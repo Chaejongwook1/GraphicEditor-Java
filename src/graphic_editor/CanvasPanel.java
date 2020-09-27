@@ -154,10 +154,6 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 		}
 		
 		// 좌표값 초기화
-		x = 0;
-		y = 0;
-		dx = 0;
-		dy = 0;
 		targetNum = -1;
 		
 	}
