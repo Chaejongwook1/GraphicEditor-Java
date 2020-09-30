@@ -23,6 +23,9 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 	private int targetNum = -1;
 	private int prex, prey, preX, preY;
 	
+	// 드래그할 때, 도형을 그리기 위한 트리거
+	boolean dragPaintTrigger = false;
+	
 	Vector<Shape> s;
 	
 	public CanvasPanel() {
@@ -35,32 +38,35 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 	
 	public void paint(Graphics g) {
 		super.paint(g);
-		
-		if(ButtonNum == 1) {
-			if(choiceQuadrant() == 1) {
-				g.drawOval(x, dy, dx - x, y - dy);
-			} else if( choiceQuadrant() == 2) {
-				g.drawOval(dx, dy, x - dx, y - dy);
-			} else if( choiceQuadrant() == 3) {
-				g.drawOval(dx, y, x - dx, dy - y);
-			} else if( choiceQuadrant() == 4) {
-				g.drawOval(x, y, dx - x, dy - y);
+		if(dragPaintTrigger == true) {
+			if(ButtonNum == 1) {
+				if(choiceQuadrant() == 1) {
+					g.drawOval(x, dy, dx - x, y - dy);
+				} else if( choiceQuadrant() == 2) {
+					g.drawOval(dx, dy, x - dx, y - dy);
+				} else if( choiceQuadrant() == 3) {
+					g.drawOval(dx, y, x - dx, dy - y);
+				} else if( choiceQuadrant() == 4) {
+					g.drawOval(x, y, dx - x, dy - y);
+				}
+			} else if(ButtonNum == 2) {
+				if(choiceQuadrant() == 1) {
+					g.drawRect(x, dy, dx - x, y - dy);
+				} else if( choiceQuadrant() == 2) {
+					g.drawRect(dx, dy, x - dx, y - dy);
+				} else if( choiceQuadrant() == 3) {
+					g.drawRect(dx, y, x - dx, dy - y);
+				} else if( choiceQuadrant() == 4) {
+					g.drawRect(x, y, dx - x, dy - y);
+				}
+			// Arrows
+			} else if(ButtonNum == 3 && targetNum != -1) {
+				s.elementAt(targetNum).moveTo(prex+(dx-x),prey+(dy-y),preX+(dx-x),preY+(dy-y));
+			// copy
+			} else if(ButtonNum == 4 && targetNum != -1) {
+				s.elementAt(targetNum).moveTo(prex+(dx-x),prey+(dy-y),preX+(dx-x),preY+(dy-y));
 			}
-		} else if(ButtonNum == 2) {
-			if(choiceQuadrant() == 1) {
-				g.drawRect(x, dy, dx - x, y - dy);
-			} else if( choiceQuadrant() == 2) {
-				g.drawRect(dx, dy, x - dx, y - dy);
-			} else if( choiceQuadrant() == 3) {
-				g.drawRect(dx, y, x - dx, dy - y);
-			} else if( choiceQuadrant() == 4) {
-				g.drawRect(x, y, dx - x, dy - y);
-			}
-		// Arrow
-		} else if(ButtonNum == 3 && targetNum != -1) {
-			s.elementAt(targetNum).moveTo(prex+(dx-x),prey+(dy-y),preX+(dx-x),preY+(dy-y));
 		}
-		
 		
 		// 그림그리기
 		for(int i = 0; i < s.size(); i++) {
@@ -101,26 +107,45 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 	public void mousePressed(MouseEvent e) {
 		x = e.getX();
 		y = e.getY();
-		if(ButtonNum == 3) {
-			for(int i = s.size() - 1; i >= 0; i--) {
-				if(s.elementAt(i).isIn(e.getX(), e.getY())) {
-					targetNum = i;
-					prex = s.elementAt(targetNum).getx();
-					prey = s.elementAt(targetNum).gety();
-					preX = s.elementAt(targetNum).getX();
-					preY = s.elementAt(targetNum).getY();
-					break;
+		targetNum = findIndex(x, y);
+		if(ButtonNum == 3) { // Cursor
+			if(targetNum != -1) { //찾은경우
+				prex = s.elementAt(targetNum).getx();
+				prey = s.elementAt(targetNum).gety();
+				preX = s.elementAt(targetNum).getX();
+				preY = s.elementAt(targetNum).getY();
+			} else if( targetNum == -1) { // 못찾은 경우
+				System.out.println("못찾음");
+				return;
+			}
+		} else if(ButtonNum == 4) { //Copy
+			if(targetNum != -1) { //찾은경우
+				prex = s.elementAt(targetNum).getx();
+				prey = s.elementAt(targetNum).gety();
+				preX = s.elementAt(targetNum).getX();
+				preY = s.elementAt(targetNum).getY();
+				
+				if(s.elementAt(targetNum) instanceof Circle) {
+					add(new Circle(s.elementAt(targetNum).getx(),s.elementAt(targetNum).gety(),s.elementAt(targetNum).getX()-s.elementAt(targetNum).getx(),s.elementAt(targetNum).getY()-s.elementAt(targetNum).gety()));
+				} else if(s.elementAt(targetNum) instanceof Rect) {
+					add(new Rect(s.elementAt(targetNum).getx(),s.elementAt(targetNum).gety(),s.elementAt(targetNum).getX()-s.elementAt(targetNum).getx(),s.elementAt(targetNum).getY()-s.elementAt(targetNum).gety()));
 				}
+			} else if( targetNum == -1) { // 못찾은 경우
+				System.out.println("못찾음");
+				return;
 			}
 		}
 	}
 	
-	public void findIndex(MouseEvent e) {
+	
+	//마우스 클릭 후 도형 찾는 함수
+	public int findIndex(int dx, int dy) {
 		for(int i = s.size() - 1; i >= 0; i--) {
-			if(s.elementAt(i).isIn(e.getX(), e.getY())) {
-				break;
+			if(s.elementAt(i).isIn(dx, dy)) {
+				return i; // 찾으면 찾은 벡터의 인덱스 반환
 			}
 		}
+		return -1; // 못찾은 경우
 	}
 
 	@Override
@@ -152,10 +177,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 				add(new Rect(x, y, dx-x, dy-y));
 			}
 		}
-		
-		// 좌표값 초기화
-		targetNum = -1;
-		
+		// 페인트 트리거값 false;
+		dragPaintTrigger = false;
 	}
 
 	@Override
@@ -172,6 +195,8 @@ public class CanvasPanel extends JPanel implements MouseListener, MouseMotionLis
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		dragPaintTrigger = true;
+		
 		dx = e.getX();
 		dy = e.getY();
 		repaint();

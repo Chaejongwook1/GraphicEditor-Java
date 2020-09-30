@@ -13,13 +13,14 @@ public class ButtonPanel extends JPanel implements ActionListener {
 
 	private JButton CircleButton;
 	private JButton RectButton;
-	private JButton ArrowButton;
+	private JButton CursorButton;
+	private JButton CopyButton;
 	public static int ButtonNum = 1;
 	
 	
 	public ButtonPanel() {
 		
-		setLayout(new GridLayout(3,1));
+		setLayout(new GridLayout(4,1));
 		setButton();
 	}
 	
@@ -37,11 +38,17 @@ public class ButtonPanel extends JPanel implements ActionListener {
 		RectButton.addActionListener(this);
 		add(RectButton);
 		
-		ArrowButton = new JButton("");
-		ArrowButton.setIcon(new ImageIcon("./images/ArrowButton.png"));
-		ArrowButton.setBorderPainted(false);
-		ArrowButton.addActionListener(this);
-		add(ArrowButton);
+		CursorButton = new JButton("");
+		CursorButton.setIcon(new ImageIcon("./images/CursorButton.png"));
+		CursorButton.setBorderPainted(false);
+		CursorButton.addActionListener(this);
+		add(CursorButton);
+		
+		CopyButton = new JButton("");
+		CopyButton.setIcon(new ImageIcon("./images/CopyButton.png"));
+		CopyButton.setBorderPainted(false);
+		CopyButton.addActionListener(this);
+		add(CopyButton);
 		
 	}
 
@@ -53,9 +60,11 @@ public class ButtonPanel extends JPanel implements ActionListener {
 		} else if(e.getSource().equals(RectButton)) {
 			System.out.println("Rect");
 			ButtonNum = 2;
-		} else if(e.getSource().equals(ArrowButton)) {
-			System.out.println("Arrow");
+		} else if(e.getSource().equals(CursorButton)) {
+			System.out.println("Cursor");
 			ButtonNum = 3;
+		} else if(e.getSource().equals(CopyButton)) {
+			ButtonNum = 4;
 		}
 	}
 	
